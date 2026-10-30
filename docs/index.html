@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aero-SHM: Airframe Structural Health Monitoring System</title>
+    <link rel="icon" href="https://img.icons8.com/fluency/48/airplane-mode-on.png" type="image/png">
+    <style>
+        :root {
+            --bg-primary: #0a0d14;
+            --bg-secondary: #121722;
+            --card-bg: #1a2233;
+            --border-color: #2b384e;
+            --text-primary: #f0f4f8;
+            --text-secondary: #94a3b8;
+            --accent-blue: #38bdf8;
+            --danger-red: #ef4444;
+            --warning-amber: #f59e0b;
+            --success-green: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 24px 32px;
+            text-align: center;
+        }
+
+        .inst-header {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+            margin-bottom: 6px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px 20px;
+        }
+
+        .badge-banner {
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 24px;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        .status-critical { background-color: var(--danger-red); color: #fff; }
+        .status-caution { background-color: var(--warning-amber); color: #000; }
+        .status-healthy { background-color: var(--success-green); color: #fff; }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 18px;
+            text-align: center;
+        }
+
+        .kpi-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .kpi-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-secondary);
+        }
+
+        .workbench {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        @media (max-width: 900px) {
+            .workbench { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .panel-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        button.btn {
+            background-color: #242f44;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        button.btn:hover, button.btn.active {
+            background-color: var(--accent-blue);
+            color: #0a0d14;
+            border-color: var(--accent-blue);
+        }
+
+        .img-container {
+            width: 100%;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            background-color: #000;
+            min-height: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .img-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .action-box {
+            background-color: #111827;
+            border-left: 4px solid var(--accent-blue);
+            padding: 14px 18px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            margin-top: 16px;
+        }
+
+        .slider-control {
+            margin-bottom: 16px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent-blue);
+        }
+
+        .download-banner {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            margin-top: 32px;
+        }
+
+        .btn-download {
+            display: inline-block;
+            background-color: var(--accent-blue);
+            color: #0a0d14;
+            text-decoration: none;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-top: 14px;
+            transition: all 0.2s;
+        }
+
+        .btn-download:hover {
+            background-color: #7dd3fc;
+            box-shadow: 0 4px 14px rgba(56, 189, 248, 0.4);
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="inst-header">Jawaharlal College of Engineering and Technology | Department of Aeronautical Engineering</div>
+        <div class="title">✈️ Aero-SHM: Airframe Structural Health Monitoring</div>
+        <div class="subtitle">Automated Optical Non-Destructive Inspection (NDI) & Damage Tolerance Analysis</div>
+    </header>
+
+    <div class="container">
+        <!-- Airworthiness Banner -->
+        <div id="statusBadge" class="badge-banner status-critical">
+            AIRFRAME STATUS: CRITICAL - GROUND AIRCRAFT (FAA ADL EXCEEDED)
+        </div>
+
+        <!-- Top KPI Metric Cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div id="kpiDensity" class="kpi-value">0.190%</div>
+                <div class="kpi-label">Defect Pixel Density</div>
+            </div>
+            <div class="kpi-card">
+                <div id="kpiFlaws" class="kpi-value">2</div>
+                <div class="kpi-label">Detected Anomalies</div>
+            </div>
+            <div class="kpi-card">
+                <div id="kpiLength" class="kpi-value">12.4 mm</div>
+                <div class="kpi-label">Max Flaw Length (a0)</div>
+            </div>
+            <div class="kpi-card">
+                <div id="kpiIntegrity" class="kpi-value">50.2%</div>
+                <div class="kpi-label">Structural Integrity</div>
+            </div>
+            <div class="kpi-card">
+                <div id="kpiLatency" class="kpi-value">77.0 ms</div>
+                <div class="kpi-label">Scan Latency (CPU)</div>
+            </div>
+        </div>
+
+        <!-- Main Workbench -->
+        <div class="workbench">
+            <!-- Inspection Specimen Panel -->
+            <div class="panel">
+                <div class="panel-title">
+                    <span>🔍 Optical Inspection Overlays</span>
+                    <span style="font-size: 0.8rem; color: #94a3b8;">Interactive Presets</span>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn active" onclick="setSpecimen('crack')">Fastener Fatigue Crack</button>
+                    <button class="btn" onclick="setSpecimen('corrosion')">Exfoliation Corrosion</button>
+                    <button class="btn" onclick="setSpecimen('cfrp')">CFRP Composite</button>
+                    <button class="btn" onclick="setSpecimen('healthy')">Pristine 2024-T3</button>
+                </div>
+
+                <div class="btn-group">
+                    <button id="btnAnnotated" class="btn active" onclick="setViewMode('annotated')">Bounding Boxes & Neon Contours</button>
+                    <button id="btnHeatmap" class="btn" onclick="setViewMode('heatmap')">Thermal Damage Heatmap (JET)</button>
+                </div>
+
+                <div class="img-container">
+                    <img id="inspectionImage" src="test2_crack_annotated.png" alt="Aero-SHM Inspection">
+                </div>
+
+                <div id="actionDirective" class="action-box">
+                    🚨 <b>FAA Part 25 Directive:</b> Immediate grounding required. Structural defect exceeds Allowable Damage Limit (ADL). Issue Form 8130-3 for secondary High-Frequency Eddy Current (HFEC) verification.
+                </div>
+            </div>
+
+            <!-- Fracture Mechanics & Diagnostics Panel -->
+            <div class="panel">
+                <div class="panel-title">
+                    <span>📐 Paris' Law Fatigue Simulator</span>
+                    <span style="font-size: 0.8rem; color: #38bdf8;">LEFM Theory</span>
+                </div>
+
+                <div class="slider-control">
+                    <div class="slider-label">
+                        <span>Cyclic Stress Range (Δσ)</span>
+                        <span id="lblStress">120 MPa</span>
+                    </div>
+                    <input type="range" id="sliderStress" min="60" max="220" value="120" oninput="updateLEFM()">
+                </div>
+
+                <div class="slider-control">
+                    <div class="slider-label">
+                        <span>Detected Crack Size (a0)</span>
+                        <span id="lblCrack">12.4 mm</span>
+                    </div>
+                    <input type="range" id="sliderCrack" min="1" max="25" value="12" oninput="updateLEFM()">
+                </div>
+
+                <div style="background-color: #0b111e; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+                    <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 6px;"><b>Substrate Alloy:</b> Al 2024-T3 (K_IC = 34.0 MPa√m, C = 1.2e-11, m = 3.4)</div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                        <span>Critical Crack Length (ac):</span>
+                        <b id="valAc" style="color: #ef4444;">14.2 mm</b>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Estimated Remaining Flight Cycles (Nf):</span>
+                        <b id="valNf" style="color: #38bdf8;">1,840 cycles</b>
+                    </div>
+                </div>
+
+                <div class="img-container" style="min-height: 160px;">
+                    <img id="chartImage" src="fig_distribution.png" alt="Morphological Clustering">
+                </div>
+                <div style="text-align: center; font-size: 0.75rem; color: #94a3b8; margin-top: 6px;">
+                    <i>Figure 7.1: Aspect Ratio vs Area morphological clustering and defect distribution.</i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Academic Report Download Section -->
+        <div class="download-banner">
+            <h2 style="font-size: 1.4rem; color: #f0f4f8; margin-bottom: 8px;">🎓 Official University Project Report Ready</h2>
+            <p style="color: #94a3b8; max-width: 700px; margin: 0 auto; font-size: 0.95rem;">
+                Compiled in complete accordance with the <b>Jawaharlal College of Engineering and Technology (JCET / APJ-AKTU)</b> 
+                B.Tech Aeronautical Engineering standard specification. Includes Title Page, Declaration, Abstract, 10 Chapters, Mathematical Derivations, and References.
+            </p>
+            <a href="Aero_SHM_Project_Report.pdf" download class="btn-download">
+                📥 Download Project Report (PDF - 15 Pages)
+            </a>
+            <div style="margin-top: 10px; font-size: 0.8rem; color: #64748b;">
+                🔒 Zero Source Code Exposure: This public portal demonstrates results, metrics, and documentation without revealing private Python algorithms.
+            </div>
+        </div>
+
+        <footer>
+            Aero-SHM System | B.Tech Aeronautical Engineering Course Project | Jawaharlal College of Engineering and Technology, Palakkad<br>
+            Autonomous Institution Affiliated to APJ Abdul Kalam Technological University (KTU) | October 2026
+        </footer>
+    </div>
+
+    <script>
+        let currentSpecimen = 'crack';
+        let currentMode = 'annotated';
+
+        const specimens = {
+            crack: {
+                annotated: 'test2_crack_annotated.png',
+                heatmap: 'test2_crack_heatmap.png',
+                density: '0.190%',
+                flaws: '2',
+                length: '12.4 mm',
+                crackVal: 12.4,
+                integrity: '50.2%',
+                status: 'CRITICAL - GROUND AIRCRAFT (FATIGUE CRACK EXCEEDS ADL)',
+                statusClass: 'status-critical',
+                directive: '🚨 <b>FAA Part 25 Directive:</b> Immediate grounding required. Structural defect exceeds Allowable Damage Limit (ADL). Issue Form 8130-3 for secondary High-Frequency Eddy Current (HFEC) verification.'
+            },
+            corrosion: {
+                annotated: 'test3_corrosion_annotated.png',
+                heatmap: 'test3_corrosion_annotated.png',
+                density: '0.929%',
+                flaws: '15',
+                length: '8.2 mm',
+                crackVal: 8.2,
+                integrity: '42.5%',
+                status: 'CRITICAL - GROUND AIRCRAFT (EXFOLIATION CORROSION CLUSTERS)',
+                statusClass: 'status-critical',
+                directive: '🚨 <b>Corrosion Action:</b> Severe exfoliation along rolling grain boundaries. Remove oxidation products, check remaining skin thickness per Structural Repair Manual (SRM).'
+            },
+            cfrp: {
+                annotated: 'test4_cfrp_annotated.png',
+                heatmap: 'test4_cfrp_annotated.png',
+                density: '0.051%',
+                flaws: '1',
+                length: '28.8 mm',
+                crackVal: 4.0,
+                integrity: '78.0%',
+                status: 'CAUTION - DEGRADED (COMPOSITE SURFACE FIBER GOUGE)',
+                statusClass: 'status-caution',
+                directive: '⚠️ <b>Composite Maintenance Advisory:</b> Surface scratch breaks resin matrix. Perform coin-tap or ultrasonic phased array (PAUT) to ensure no subsurface delamination occurred.'
+            },
+            healthy: {
+                annotated: 'test1_healthy_annotated.png',
+                heatmap: 'test1_healthy_annotated.png',
+                density: '0.000%',
+                flaws: '0',
+                length: '0.0 mm',
+                crackVal: 0.5,
+                integrity: '100.0%',
+                status: 'HEALTHY - AIRWORTHY (ZERO STRUCTURAL DEFECTS)',
+                statusClass: 'status-healthy',
+                directive: '✅ <b>Airworthiness Clearance:</b> Surface integrity fully intact. Fastener rows meet MS20426 specification. Clear for revenue commercial flight.'
+            }
+        };
+
+        function setSpecimen(type) {
+            currentSpecimen = type;
+            document.querySelectorAll('.btn-group button').forEach(b => {
+                if (b.innerText.toLowerCase().includes(type) || (type === 'crack' && b.innerText.includes('Crack'))) {
+                    b.classList.add('active');
+                } else if (['Fastener Fatigue Crack', 'Exfoliation Corrosion', 'CFRP Composite', 'Pristine 2024-T3'].some(name => b.innerText.includes(name))) {
+                    b.classList.remove('active');
+                }
+            });
+
+            updateUI();
+        }
+
+        function setViewMode(mode) {
+            currentMode = mode;
+            document.getElementById('btnAnnotated').classList.toggle('active', mode === 'annotated');
+            document.getElementById('btnHeatmap').classList.toggle('active', mode === 'heatmap');
+            updateUI();
+        }
+
+        function updateUI() {
+            const data = specimens[currentSpecimen];
+            document.getElementById('inspectionImage').src = (currentMode === 'heatmap' && data.heatmap) ? data.heatmap : data.annotated;
+            
+            document.getElementById('statusBadge').innerText = 'AIRFRAME STATUS: ' + data.status;
+            document.getElementById('statusBadge').className = 'badge-banner ' + data.statusClass;
+
+            document.getElementById('kpiDensity').innerText = data.density;
+            document.getElementById('kpiFlaws').innerText = data.flaws;
+            document.getElementById('kpiLength').innerText = data.length;
+            document.getElementById('kpiIntegrity').innerText = data.integrity;
+            document.getElementById('actionDirective').innerHTML = data.directive;
+
+            document.getElementById('sliderCrack').value = Math.max(1, Math.min(25, Math.round(data.crackVal)));
+            updateLEFM();
+        }
+
+        function updateLEFM() {
+            const stress = parseFloat(document.getElementById('sliderStress').value);
+            const a0 = parseFloat(document.getElementById('sliderCrack').value);
+
+            document.getElementById('lblStress').innerText = stress + ' MPa';
+            document.getElementById('lblCrack').innerText = a0.toFixed(1) + ' mm';
+
+            const K_IC = 34.0;
+            const Y = 1.12;
+            const C = 1.2e-11;
+            const m = 3.4;
+
+            // Critical crack length in meters: ac = (1 / pi) * (K_IC / (Y * sigma * 1e6))^2
+            const ac_m = (1.0 / Math.PI) * Math.pow((K_IC * 1e6) / (Y * (stress * 1.15) * 1e6), 2);
+            const ac_mm = ac_m * 1000.0;
+            document.getElementById('valAc').innerText = ac_mm.toFixed(1) + ' mm';
+
+            if (a0 >= ac_mm) {
+                document.getElementById('valNf').innerText = '0 (FAILED - BRITTLE FRACTURE)';
+                document.getElementById('valNf').style.color = '#ef4444';
+            } else {
+                const a0_m = a0 / 1000.0;
+                const term1 = 2.0 / ((m - 2.0) * C * Math.pow(Y * stress * 1e6 * Math.sqrt(Math.PI), m));
+                const term2 = (1.0 / Math.pow(a0_m, (m - 2.0) / 2.0)) - (1.0 / Math.pow(ac_m, (m - 2.0) / 2.0));
+                const Nf = Math.max(0, Math.round(term1 * term2));
+                document.getElementById('valNf').innerText = Nf.toLocaleString() + ' cycles';
+                document.getElementById('valNf').style.color = '#38bdf8';
+            }
+        }
+
+        updateLEFM();
+    </script>
+</body>
+</html>
