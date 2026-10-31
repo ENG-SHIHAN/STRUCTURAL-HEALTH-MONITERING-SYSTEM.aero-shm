@@ -451,9 +451,9 @@ with tab_lefm:
         if init_crack_mm >= a_crit_mm:
             st.error(f"⚠️ Current detected flaw length ({init_crack_mm:.1f} mm) EXCEEDS critical crack length ({a_crit_mm:.1f} mm)! Immediate grounding required.")
         else:
-            # Estimate cycles to critical failure
+            # Estimate cycles to critical failure via LEFM Paris' Law
             a0_m = init_crack_mm / 1000.0
-            term1 = 2.0 / ((m - 2.0) * C * ((Y * delta_sigma * 1e6 * np.sqrt(np.pi)) ** m))
+            term1 = 2.0 / ((m - 2.0) * C * ((Y * delta_sigma * np.sqrt(np.pi)) ** m))
             term2 = (1.0 / (a0_m ** ((m - 2.0) / 2.0))) - (1.0 / (a_crit_m ** ((m - 2.0) / 2.0)))
             cycles_to_failure = max(0, int(term1 * term2))
             st.metric("Estimated Flight Cycles to Catastrophic Failure (N_f)", f"{cycles_to_failure:,} cycles")

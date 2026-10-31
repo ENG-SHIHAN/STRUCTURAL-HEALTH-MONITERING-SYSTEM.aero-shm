@@ -207,33 +207,6 @@
             accent-color: var(--accent-blue);
         }
 
-        .download-banner {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            border: 1px solid #334155;
-            border-radius: 12px;
-            padding: 24px;
-            text-align: center;
-            margin-top: 32px;
-        }
-
-        .btn-download {
-            display: inline-block;
-            background-color: var(--accent-blue);
-            color: #0a0d14;
-            text-decoration: none;
-            padding: 12px 28px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 1rem;
-            margin-top: 14px;
-            transition: all 0.2s;
-        }
-
-        .btn-download:hover {
-            background-color: #7dd3fc;
-            box-shadow: 0 4px 14px rgba(56, 189, 248, 0.4);
-        }
-
         footer {
             text-align: center;
             font-size: 0.85rem;
@@ -317,12 +290,23 @@
                     <span style="font-size: 0.8rem; color: #38bdf8;">LEFM Theory</span>
                 </div>
 
+                <div class="slider-control" style="margin-bottom: 12px;">
+                    <div class="slider-label">
+                        <span>Substrate Material Alloy</span>
+                    </div>
+                    <select id="materialSelect" onchange="updateLEFM()" style="width: 100%; background: #0f172a; color: #38bdf8; border: 1px solid var(--border-color); padding: 8px 10px; border-radius: 6px; font-size: 0.82rem; font-weight: 500; outline: none; cursor: pointer;">
+                        <option value="2024" selected>Al 2024-T3 Fuselage Skin (K_IC = 34 MPa√m, C = 1.2e-11, m = 3.4)</option>
+                        <option value="7075">Al 7075-T6 Wing Spar (K_IC = 24 MPa√m, C = 2.5e-11, m = 3.8)</option>
+                        <option value="titanium">Ti-6Al-4V Engine Bulkhead (K_IC = 55 MPa√m, C = 8.5e-12, m = 3.2)</option>
+                    </select>
+                </div>
+
                 <div class="slider-control">
                     <div class="slider-label">
                         <span>Cyclic Stress Range (Δσ)</span>
                         <span id="lblStress">120 MPa</span>
                     </div>
-                    <input type="range" id="sliderStress" min="60" max="220" value="120" oninput="updateLEFM()">
+                    <input type="range" id="sliderStress" min="60" max="220" step="5" value="120" oninput="updateLEFM()">
                 </div>
 
                 <div class="slider-control">
@@ -330,19 +314,36 @@
                         <span>Detected Crack Size (a0)</span>
                         <span id="lblCrack">12.4 mm</span>
                     </div>
-                    <input type="range" id="sliderCrack" min="1" max="25" value="12" oninput="updateLEFM()">
+                    <input type="range" id="sliderCrack" min="1" max="25" step="0.2" value="12.4" oninput="updateLEFM()">
                 </div>
 
                 <div style="background-color: #0b111e; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; margin-bottom: 16px;">
-                    <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 6px;"><b>Substrate Alloy:</b> Al 2024-T3 (K_IC = 34.0 MPa√m, C = 1.2e-11, m = 3.4)</div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <div id="lblMatDesc" style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 8px;"><b>Substrate Alloy:</b> Al 2024-T3 (Fuselage Skin)</div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
                         <span>Critical Crack Length (ac):</span>
-                        <b id="valAc" style="color: #ef4444;">14.2 mm</b>
+                        <b id="valAc" style="color: #ef4444;">15.4 mm</b>
                     </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span>Estimated Remaining Flight Cycles (Nf):</span>
-                        <b id="valNf" style="color: #38bdf8;">1,840 cycles</b>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span>Remaining Fatigue Life (Nf):</span>
+                        <b id="valNf" style="color: #38bdf8;">3,496 flight cycles</b>
                     </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>FAA Inspection Interval (Nf / 2):</span>
+                        <b id="valInspect" style="color: #10b981;">1,748 flight cycles</b>
+                    </div>
+
+                    <!-- Visual Crack Progression Bar -->
+                    <div style="margin-top: 8px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-secondary); margin-bottom: 4px;">
+                            <span>Crack Proximity to Critical Limit:</span>
+                            <span id="valRatio">80.5%</span>
+                        </div>
+                        <div style="width: 100%; height: 8px; background: #1e293b; border-radius: 4px; overflow: hidden;">
+                            <div id="barCritical" style="height: 100%; width: 80.5%; background: #f59e0b; transition: width 0.25s ease, background-color 0.25s ease;"></div>
+                        </div>
+                    </div>
+
+                    <div id="lefmAlert" style="margin-top: 10px; font-size: 0.78rem; padding: 8px 10px; border-radius: 6px; line-height: 1.4;"></div>
                 </div>
 
                 <div class="img-container" style="min-height: 160px;">
@@ -351,21 +352,6 @@
                 <div style="text-align: center; font-size: 0.75rem; color: #94a3b8; margin-top: 6px;">
                     <i>Figure 7.1: Aspect Ratio vs Area morphological clustering and defect distribution.</i>
                 </div>
-            </div>
-        </div>
-
-        <!-- Academic Report Download Section -->
-        <div class="download-banner">
-            <h2 style="font-size: 1.4rem; color: #f0f4f8; margin-bottom: 8px;">🎓 Official University Project Report Ready</h2>
-            <p style="color: #94a3b8; max-width: 700px; margin: 0 auto; font-size: 0.95rem;">
-                Compiled in complete accordance with the <b>Jawaharlal College of Engineering and Technology (JCET / APJ-AKTU)</b> 
-                B.Tech Aeronautical Engineering standard specification. Includes Title Page, Declaration, Abstract, 10 Chapters, Mathematical Derivations, and References.
-            </p>
-            <a href="Aero_SHM_Project_Report.pdf" download class="btn-download">
-                📥 Download Project Report (PDF - 15 Pages)
-            </a>
-            <div style="margin-top: 10px; font-size: 0.8rem; color: #64748b;">
-                🔒 Zero Source Code Exposure: This public portal demonstrates results, metrics, and documentation without revealing private Python algorithms.
             </div>
         </div>
 
@@ -463,37 +449,99 @@
             document.getElementById('kpiIntegrity').innerText = data.integrity;
             document.getElementById('actionDirective').innerHTML = data.directive;
 
-            document.getElementById('sliderCrack').value = Math.max(1, Math.min(25, Math.round(data.crackVal)));
+            document.getElementById('sliderCrack').value = Math.max(1, Math.min(25, parseFloat(data.crackVal)));
             updateLEFM();
         }
+
+        const materials = {
+            '2024': { name: 'Al 2024-T3 (Fuselage Skin)', K_IC: 34.0, C: 1.2e-11, m: 3.4, Y: 1.12 },
+            '7075': { name: 'Al 7075-T6 (Wing Spar)', K_IC: 24.0, C: 2.5e-11, m: 3.8, Y: 1.12 },
+            'titanium': { name: 'Ti-6Al-4V (Engine Bulkhead)', K_IC: 55.0, C: 8.5e-12, m: 3.2, Y: 1.12 }
+        };
 
         function updateLEFM() {
             const stress = parseFloat(document.getElementById('sliderStress').value);
             const a0 = parseFloat(document.getElementById('sliderCrack').value);
+            const matSelect = document.getElementById('materialSelect');
+            const matKey = matSelect ? matSelect.value : '2024';
+            const mat = materials[matKey] || materials['2024'];
 
             document.getElementById('lblStress').innerText = stress + ' MPa';
             document.getElementById('lblCrack').innerText = a0.toFixed(1) + ' mm';
+            if (document.getElementById('lblMatDesc')) {
+                document.getElementById('lblMatDesc').innerHTML = '<b>Substrate Alloy:</b> ' + mat.name + ' (K_IC = ' + mat.K_IC + ' MPa√m)';
+            }
 
-            const K_IC = 34.0;
-            const Y = 1.12;
-            const C = 1.2e-11;
-            const m = 3.4;
+            const K_IC = mat.K_IC;
+            const Y = mat.Y;
+            const C = mat.C;
+            const m = mat.m;
 
-            // Critical crack length in meters: ac = (1 / pi) * (K_IC / (Y * sigma * 1e6))^2
-            const ac_m = (1.0 / Math.PI) * Math.pow((K_IC * 1e6) / (Y * (stress * 1.15) * 1e6), 2);
+            // Maximum cyclic peak stress at R = 0.1 (sigma_max = delta_sigma * 1.15)
+            const sigma_max = stress * 1.15;
+
+            // Critical crack length in meters: a_c = (1 / pi) * (K_IC / (Y * sigma_max))^2
+            const ac_m = (1.0 / Math.PI) * Math.pow(K_IC / (Y * sigma_max), 2);
             const ac_mm = ac_m * 1000.0;
             document.getElementById('valAc').innerText = ac_mm.toFixed(1) + ' mm';
+
+            const barEl = document.getElementById('barCritical');
+            const ratioEl = document.getElementById('valRatio');
+            const alertEl = document.getElementById('lefmAlert');
+            const inspectEl = document.getElementById('valInspect');
+
+            const pct = Math.min(100, Math.max(0, (a0 / ac_mm) * 100));
+            if (ratioEl) ratioEl.innerText = pct.toFixed(1) + '% of limit (' + a0.toFixed(1) + ' / ' + ac_mm.toFixed(1) + ' mm)';
+            if (barEl) {
+                barEl.style.width = pct + '%';
+                barEl.style.background = pct >= 100 ? '#ef4444' : (pct > 70 ? '#f59e0b' : '#10b981');
+            }
 
             if (a0 >= ac_mm) {
                 document.getElementById('valNf').innerText = '0 (FAILED - BRITTLE FRACTURE)';
                 document.getElementById('valNf').style.color = '#ef4444';
+                if (inspectEl) {
+                    inspectEl.innerText = '0 cycles (AIRCRAFT GROUNDED)';
+                    inspectEl.style.color = '#ef4444';
+                }
+                if (alertEl) {
+                    alertEl.style.display = 'block';
+                    alertEl.style.background = 'rgba(239, 68, 68, 0.2)';
+                    alertEl.style.border = '1px solid #ef4444';
+                    alertEl.style.color = '#fca5a5';
+                    alertEl.innerHTML = '🚨 <b>CRITICAL LEFM DIRECTIVE:</b> Flaw length exceeds critical crack threshold (a₀ ≥ a_c). Rapid unstable brittle fracture occurs immediately. Ground aircraft per FAA Part 25.';
+                }
             } else {
                 const a0_m = a0 / 1000.0;
-                const term1 = 2.0 / ((m - 2.0) * C * Math.pow(Y * stress * 1e6 * Math.sqrt(Math.PI), m));
+                // Paris' Law integration:
+                // Nf = [ 2 / ((m - 2) * C * (Y * DeltaSigma * sqrt(pi))^m) ] * [ (1 / a0^((m-2)/2)) - (1 / ac^((m-2)/2)) ]
+                // DeltaSigma is in MPa, matching C in m/cycle / (MPa*sqrt(m))^m
+                const term1 = 2.0 / ((m - 2.0) * C * Math.pow(Y * stress * Math.sqrt(Math.PI), m));
                 const term2 = (1.0 / Math.pow(a0_m, (m - 2.0) / 2.0)) - (1.0 / Math.pow(ac_m, (m - 2.0) / 2.0));
                 const Nf = Math.max(0, Math.round(term1 * term2));
-                document.getElementById('valNf').innerText = Nf.toLocaleString() + ' cycles';
+                const N_inspect = Math.floor(Nf / 2);
+
+                document.getElementById('valNf').innerText = Nf.toLocaleString() + ' flight cycles';
                 document.getElementById('valNf').style.color = '#38bdf8';
+                if (inspectEl) {
+                    inspectEl.innerText = N_inspect.toLocaleString() + ' cycles (Nf / 2)';
+                    inspectEl.style.color = '#10b981';
+                }
+
+                if (alertEl) {
+                    alertEl.style.display = 'block';
+                    if (Nf < 3000) {
+                        alertEl.style.background = 'rgba(245, 158, 11, 0.15)';
+                        alertEl.style.border = '1px solid #f59e0b';
+                        alertEl.style.color = '#fde68a';
+                        alertEl.innerHTML = '⚠️ <b>ELEVATED FATIGUE PROGRESSION:</b> Remaining life below 3,000 cycles. Perform High-Frequency Eddy Current (HFEC) NDT within <b>' + N_inspect.toLocaleString() + ' cycles</b>.';
+                    } else {
+                        alertEl.style.background = 'rgba(16, 185, 129, 0.12)';
+                        alertEl.style.border = '1px solid #10b981';
+                        alertEl.style.color = '#6ee7b7';
+                        alertEl.innerHTML = '✅ <b>ACCEPTABLE FATIGUE ENVELOPE:</b> Sub-critical crack growth. Next scheduled damage tolerance inspection threshold at <b>' + N_inspect.toLocaleString() + ' cycles</b>.';
+                    }
+                }
             }
         }
 
